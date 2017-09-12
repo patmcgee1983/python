@@ -47,22 +47,32 @@ class App(object):
 
         #ctime = time.strptime("%H:%M:%S")
 
-        myHour= gmtime().tm_hour - 6
-        
+        myHour= gmtime().tm_hour - 7
+        if myHour < 0:
+            myHour += 24
+
+            
         for x in range(0,len(self.zoneList)):
             if self.zoneList[x].isAuto() == True:
 
-                if myHour >= self.zoneList[x].startTime and myHour <= self.zoneList[x].endTime:
-                    self.zoneList[x].switchOn()
+                if (myHour >= self.zoneList[x].startTime and myHour <= self.zoneList[x].endTime):
+
+                    #print(self.zoneList[x].isOn())
+                    
+                    if self.zoneList[x].isOn() == False:
+                        
+                        print("Zone " + str(self.zoneList[x].id) + " scheduled to be on between " + str(self.zoneList[x].startTime) + " and " + str(self.zoneList[x].endTime) + " - Current time : " + str(myHour))
+                        
+                        self.zoneList[x].switchOn()
                 
                 else:
-                    self.zoneList[x].switchOff()
-                    print(myHour)
+                    if self.zoneList[x].isOn() == True:
+                        print("Zone " + str(self.zoneList[x].id) + " scheduled to be on between " + str(self.zoneList[x].startTime) + " and " + str(self.zoneList[x].endTime) + " - Current time : " + str(myHour))
+                        self.zoneList[x].switchOff()
 
                     
-                #print(self.zoneList[x].startTime)
-               # print(gmtime().tm_hour)
-                
+            #print(self.zoneList[x].startTime)
+            #print(myHour)
             #print(self.zoneList[x].isOn())
 
         clock.after(200, self.check)
@@ -189,22 +199,29 @@ class Zone(App):
         self.switchOff()
         
     def switchOn(self):
+        self.on = True
         print('Switch ' + str(self.id) + ' is now ON')
         self.buttonOn.configure(bg = "Lime Green")
         self.buttonOff.configure(bg = "Light Grey")
 
     def switchOff(self):
-        self.position = 0
+        self.on = False
         print('Switch ' + str(self.id) + ' is now OFF')
         self.buttonOff.configure(bg = "red")
         self.buttonOn.configure(bg = "Light Grey")
 
     def switchAuto(self):
-        self.auto = True
-        print('Switch ' + str(self.id) + ' is now set to Automatic')
-        self.buttonOn.configure(bg = "Light Grey")
-        self.buttonOff.configure(bg = "Light Grey")
-        self.buttonAuto.configure(bg = "Lime Green")
+        if self.auto == True:
+            
+            self.auto = False
+            print('Switch ' + str(self.id) + ' is now set to manual')
+            self.buttonAuto.configure(bg = "Light Grey")
+
+        else:
+            
+            self.auto = True
+            print('Switch ' + str(self.id) + ' is now set to Automatic')
+            self.buttonAuto.configure(bg = "Lime Green")
         #root.clock.configure(bg = "green")
             
     def config(self):
@@ -216,13 +233,13 @@ class Zone(App):
         return self.startTime
 
     def isOn(self):
-        if self.on == 0:
+        if self.on == False:
             return False
         else:
             return True
         
     def isAuto(self):
-        if self.auto == 0:
+        if self.auto == False:
             return False
         else:
             return True
