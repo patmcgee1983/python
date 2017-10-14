@@ -1,5 +1,6 @@
 # Simulates multiserver queue and plots distribution of delay times on Histogram
 # matplot works on Linux only
+# Pat McGee
 
 import matplotlib.pyplot as plt
 import queue
