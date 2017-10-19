@@ -14,6 +14,7 @@ import random
 numberOfServers = 5
 Servers = []
 
+# Server object
 class Server:
     def __init__(self, id):
         self.id = id
@@ -24,7 +25,8 @@ class Server:
     
     def addVm(self, vmId):
         self.list.append(vmId)
-    
+
+# Load servers into server array
 for i in range(0,numberOfServers):
     Servers.append(Server(i))
 
