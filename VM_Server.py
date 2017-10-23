@@ -11,37 +11,75 @@ import numpy
 import random
 
 # Define Constants & Variables
-numberOfServers = 5
-Servers = []
+servers = []
+enableDebugTests = True
+timeSlots = 10
+
+# resources consumed correspod to VM #
+# ie = vm[0] = 0.5, etc
+vm = [0.5, 0.25, 0.125]
 
 # Server object
 class Server:
     def __init__(self, id):
         self.id = id
         self.list = []
+        self.cpu = 1;
     
     def getVms(self):
         return self.list
     
     def addVm(self, vmId):
         self.list.append(vmId)
+        self.cpu = self.cpu - vm[vmId]
+        
+    def getRemainingCPU(self):
+        return self.cpu
+        
+    def tick(self):
+        departures()
+        
+    def departures(self):
+        return false
+        
+    def depart(self):
+        return false
+    
+    def toString(self):
+        return "Server " + str(self.id) + ": " + str(self.getVms()) + " : " + str(self.getRemainingCPU()) +" CPU remaining"
 
-# Load servers into server array
-for i in range(0,numberOfServers):
-    Servers.append(Server(i))
+def createNewServer(id):
+    #print("created server " + str(id))
+    servers.append(Server(id))
 
 
-# Load servers with test data 
-def testServers():
-    for i in range(0,numberOfServers):
-        for j in range(0,5):
-            x = random.randint(0,44)
-            Servers[i].addVm(x)
-
+def firstFit(vmId):
+    # Checking the servers        
+    for i in range(0,len(servers)+1):
+        
+        # If we checked all servers and no room, make new server
+        if (i == len(servers)):
+            createNewServer(i)
+            servers[i].addVm(vmId)
+            break
+        
+        # If space found on a server, put vm in
+        if servers[i].getRemainingCPU() >= vm[vmId]:
+            servers[i].addVm(vmId)
+            #print("found space in server " + str(i))
+            break
+        
 # Print the contents of all servers
 def printServers():
-    for i in range(0, numberOfServers):
-        print(str(Servers[i].getVms()))
+    for i in range(0, len(servers)):
+        print(servers[i].toString())
 
-testServers()
+# Need one server to start
+createNewServer(0);
+
+#  
+for i in range(0,timeSlots):
+    #print("----- slot "+str(i) + " --------")
+    firstFit(random.randint(0,len(vm)-1))
+    
 printServers()
