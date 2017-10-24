@@ -15,7 +15,7 @@ servers = []
 enableDebugTests = True
 timeSlots = 1022
 arrivalRate = 0.9
-departureRate = 0.4
+departureRate = 0.5
 x = []
 y = []
 
@@ -87,11 +87,15 @@ for k in range(0,timeSlots):
     #print("----- slot "+str(i) + " --------")
     firstFit(random.randint(0,len(vm)-1))
     
-    for i in range(0,len(servers)-1):
+    i=0
+    
+    while i < len(servers):
         servers[i].tick()
         if (servers[i].getRemainingCPU() == 1):
             servers.pop(i)
-            i = i -1
+            i -= 1
+        
+        i += 1
             
     x.append(k)
     y.append(len(servers))
@@ -99,7 +103,7 @@ for k in range(0,timeSlots):
 
 avgServers = serverSum / k
 
-plt.plot(x,y)
+plt.bar(x,y,2, color='red')
 plt.ylabel('Number of Servers')
 plt.xlabel('Time')
 plt.title('Servers needed over time - Avg Servers = '+str(round(avgServers,2)))
