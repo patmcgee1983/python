@@ -13,7 +13,11 @@ import random
 # Define Constants & Variables
 servers = []
 enableDebugTests = True
-timeSlots = 10
+timeSlots = 1022
+arrivalRate = 0.9
+departureRate = 0.5
+x = []
+y = []
 
 # resources consumed correspod to VM #
 # ie = vm[0] = 0.5, etc
@@ -37,13 +41,16 @@ class Server:
         return self.cpu
         
     def tick(self):
-        departures()
-        
-    def departures(self):
-        return false
-        
+        for i in range(0,len(self.list)):
+            x = random.random()
+            if (x > departureRate):
+                self.depart()
+                
     def depart(self):
-        return false
+        item = self.list.pop()
+        self.cpu = self.cpu + vm[item]
+            
+                
     
     def toString(self):
         return "Server " + str(self.id) + ": " + str(self.getVms()) + " : " + str(self.getRemainingCPU()) +" CPU remaining"
@@ -74,12 +81,26 @@ def printServers():
     for i in range(0, len(servers)):
         print(servers[i].toString())
 
-# Need one server to start
-createNewServer(0);
-
+serverSum = 0
 #  
-for i in range(0,timeSlots):
+for k in range(0,timeSlots):
     #print("----- slot "+str(i) + " --------")
     firstFit(random.randint(0,len(vm)-1))
     
-printServers()
+    for i in range(0,len(servers)-1):
+        servers[i].tick()
+        if (servers[i].getRemainingCPU() == 1):
+            servers.pop(i)
+            
+    x.append(k)
+    y.append(len(servers))
+    serverSum = serverSum + len(servers)
+
+avgServers = serverSum / k
+
+plt.plot(x,y)
+plt.ylabel('Number of Servers')
+plt.xlabel('Time')
+plt.title('Servers needed over time - Avg Servers = '+str(round(avgServers,2)))
+plt.show()
+#printServers()
