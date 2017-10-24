@@ -15,7 +15,7 @@ servers = []
 enableDebugTests = True
 timeSlots = 1022
 arrivalRate = 0.9
-departureRate = 0.5
+departureRate = 0.4
 x = []
 y = []
 
@@ -43,7 +43,7 @@ class Server:
     def tick(self):
         for i in range(0,len(self.list)):
             x = random.random()
-            if (x > departureRate):
+            if (x < departureRate):
                 self.depart()
                 
     def depart(self):
@@ -91,6 +91,7 @@ for k in range(0,timeSlots):
         servers[i].tick()
         if (servers[i].getRemainingCPU() == 1):
             servers.pop(i)
+            i = i -1
             
     x.append(k)
     y.append(len(servers))
