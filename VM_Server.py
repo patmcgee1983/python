@@ -15,7 +15,8 @@ enableDebugTests = True
 timeSlots = 100
 arrivalRate = 0.9
 x = []
-y = []
+yBest = []
+yFirst = []
 # N = max number of servers that will arrive at each timeslot, will iterate each N
 N = [2, 4, 8, 16, 32]
 
@@ -86,7 +87,46 @@ def firstFit(numberOfVmsCreated):
                 servers[i].addVm(vmId)
                 #print("found space in server " + str(i))
                 break
+
+def bestFit(numberOfVmsCreated): #vmID is a single value between 0 and 2 (inclusive) representing a VM type
+    bestVal = 10
+    bestServer = -1
+    i = 0
+    
+    for numberOfVms in range(0,numberOfVmsCreated):
         
+        # Generate a new VM id
+        vmId = numpy.random.randint(0,len(vm))
+            
+        print(str(len(servers)))
+        for i in range(0,len(servers)+1):
+            # If we checked all servers and no room, make new server
+            if (i == len(servers)):
+                createNewServer(i)
+                servers[i].addVm(vmId)
+                break
+            
+            # If space found on a server, check for exact match, add
+            elif (i < len(servers)):
+                if (servers[i].getRemainingCPU() == vm[vmId]):
+                    servers[i].addVm(vmId)
+
+    
+            elif((servers[i].getRemainingCPU() - vm[vmId] > 0) and (servers[i].getRemainingCPU() - vm[vmId] < bestVal)):
+                    bestVal = servers[i].getRemainingCPU() - vm[vmId]
+                    bestServer = i
+            #i += 1
+            else:
+                print("else")
+            
+        if(bestServer != -1):
+            servers[bestServer].addVm(vmId)
+        else:
+            createNewServer(i)
+            servers[i].addVm(vmId)
+
+
+
 # Print the contents of all servers
 def printServers():
     for i in range(0, len(servers)):
@@ -120,10 +160,47 @@ for iterations in range(0,len(N)):
         serverSum = serverSum + len(servers)
     
     avgServers = serverSum / k
-    y.append(avgServers)
-    print("----------" + str(N[iterations]) + " : " + str(y[iterations]) + "-----------")
+    yFirst.append(avgServers)
+    #yBest.append(avgServers)
+    print("----------" + str(N[iterations]) + " : " + str(yFirst[iterations]) + "-----------")
 
-plt.plot(N,y,'b-')
+
+servers.clear()
+
+
+
+for iterations in range(0,len(N)):
+    serverSum = 0
+    #  
+    for k in range(0,timeSlots):
+        
+        # The number of vms arriving is a binomial with parameters N,lambda
+        vmsArrived = numpy.random.binomial(N[iterations],arrivalRate)
+        
+        #firstFit with the number of arrivals
+        bestFit(vmsArrived)
+        
+        # BestFit(numberOfArrivals)
+        # Best fit method call will go here
+        
+        i=0
+        
+        while i < len(servers):
+            servers[i].tick()
+            if (servers[i].getRemainingCPU() == 1):
+                servers.pop(i)
+                i -= 1
+            
+            i += 1
+                
+        serverSum = serverSum + len(servers)
+    
+    avgServers = serverSum / k
+    yBest.append(avgServers)
+    print("----------" + str(N[iterations]) + " : " + str(yBest[iterations]) + "-----------")
+
+
+plt.plot(N,yFirst,'b-',N,yBest,'r-')
 plt.ylabel('Avg Number of Servers')
 plt.xlabel('N')
 plt.title('Best fit vs First Fit Avg Number of Servers for N jobs')
