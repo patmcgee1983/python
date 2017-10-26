@@ -12,7 +12,7 @@ import random
 # Define Constants & Variables
 servers = []
 enableDebugTests = True
-timeSlots = 100
+timeSlots = 1000
 arrivalRate = 0.9
 x = []
 yBest = []
@@ -88,43 +88,42 @@ def firstFit(numberOfVmsCreated):
                 #print("found space in server " + str(i))
                 break
 
-def bestFit(numberOfVmsCreated): #vmID is a single value between 0 and 2 (inclusive) representing a VM type
-    bestVal = 10
-    bestServer = -1
+def bestFit(numberOfVmsCreated):
+
     
     for numberOfVms in range(0,numberOfVmsCreated):
         
         # Generate a new VM id
+        bestVal = 10
+        bestServer = -1
         vmId = numpy.random.randint(0,len(vm))
             
         #print(str(len(servers)))
         
         for i in range(0,len(servers)+1):
             # If we checked all servers and no room, make new server
-            if (i == len(servers)):
+            if (i >= len(servers) and bestServer == -1):
                 createNewServer(i)
                 servers[i].addVm(vmId)
+                bestServer = -1
                 break
             
             # If space found on a server, check for exact match, add
             elif (i < len(servers)):
                 if (servers[i].getRemainingCPU() == vm[vmId]):
                     servers[i].addVm(vmId)
+                    bestServer = -1
                     break
 
     
-            elif((servers[i].getRemainingCPU() - vm[vmId] > 0) and (servers[i].getRemainingCPU() - vm[vmId] < bestVal)):
+                elif((servers[i].getRemainingCPU() - vm[vmId] > 0) and (servers[i].getRemainingCPU() - vm[vmId] < bestVal)):
                     bestVal = servers[i].getRemainingCPU() - vm[vmId]
                     bestServer = i
-            #i += 1
-            else:
-                print("else")
+                    #print("best")
             
         if(bestServer != -1):
             servers[bestServer].addVm(vmId)
-        else:
-            createNewServer(i)
-            servers[i].addVm(vmId)
+            #print("added to server "+str(bestServer))
 
 
 
@@ -201,7 +200,8 @@ for iterations in range(0,len(N)):
     print("----------" + str(N[iterations]) + " : " + str(yBest[iterations]) + "-----------")
 
 
-plt.plot(N,yFirst,'b-',N,yBest,'r-')
+plt.plot(N,yFirst,'b-', label='First Fit')
+plt.plot(N,yBest,'r-', label='Best Fit')
 plt.ylabel('Avg Number of Servers')
 plt.xlabel('N')
 plt.title('Best fit vs First Fit Avg Number of Servers for N jobs')
