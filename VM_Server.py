@@ -13,16 +13,17 @@ import random
 # Define Constants & Variables
 servers = []
 enableDebugTests = True
-timeSlots = 1022
+timeSlots = 100
 arrivalRate = 0.9
-departureRate = 0.5
 x = []
 y = []
+N = [2, 4, 8, 16, 32]
+
 
 # resources consumed correspod to VM #
 # ie = vm[0] = 0.5, etc
 vm = [0.5, 0.25, 0.125]
-
+geometricMean = [10, 8, 30]
 # Server object
 class Server:
     def __init__(self, id):
@@ -41,10 +42,14 @@ class Server:
         return self.cpu
         
     def tick(self):
-        for i in range(0,len(self.list)):
-            x = random.random()
-            if (x < departureRate):
+        i=0
+        while i < len(self.list):
+            # The probability of a vm vacating a server in any timeslot is 1 /  its geometric mean
+            if (random.random() <= (1 / geometricMean[self.list[i]])):
                 self.depart()
+                i-=1
+
+            i += 1
                 
     def depart(self):
         item = self.list.pop()
@@ -60,52 +65,63 @@ def createNewServer(id):
     servers.append(Server(id))
 
 
-def firstFit(vmId):
-    # Checking the servers        
-    for i in range(0,len(servers)+1):
+def firstFit(numberOfVmsCreated):
+    
+    # Checking the servers
+    for numberOfVms in range(0,numberOfVmsCreated):
         
-        # If we checked all servers and no room, make new server
-        if (i == len(servers)):
-            createNewServer(i)
-            servers[i].addVm(vmId)
-            break
-        
-        # If space found on a server, put vm in
-        if servers[i].getRemainingCPU() >= vm[vmId]:
-            servers[i].addVm(vmId)
-            #print("found space in server " + str(i))
-            break
+        # Generate a new VM id
+        vmId = numpy.random.randint(0,len(vm))
+         
+        for i in range(0,len(servers)+1):
+            
+            # If we checked all servers and no room, make new server
+            if (i == len(servers)):
+                createNewServer(i)
+                servers[i].addVm(vmId)
+                break
+            
+            # If space found on a server, put vm in
+            if servers[i].getRemainingCPU() >= vm[vmId]:
+                servers[i].addVm(vmId)
+                #print("found space in server " + str(i))
+                break
         
 # Print the contents of all servers
 def printServers():
     for i in range(0, len(servers)):
         print(servers[i].toString())
 
-serverSum = 0
-#  
-for k in range(0,timeSlots):
-    #print("----- slot "+str(i) + " --------")
-    firstFit(random.randint(0,len(vm)-1))
-    
-    i=0
-    
-    while i < len(servers):
-        servers[i].tick()
-        if (servers[i].getRemainingCPU() == 1):
-            servers.pop(i)
-            i -= 1
+
+for iterations in range(0,len(N)):
+    serverSum = 0
+    #  
+    for k in range(0,timeSlots):
         
-        i += 1
+        vmsArrived = numpy.random.binomial(N[iterations],arrivalRate)
+        #print(str(vmsArrived))
+        firstFit(vmsArrived)
+        
+        # BestFit(numberOfArrivals)
+        i=0
+        
+        while i < len(servers):
+            servers[i].tick()
+            if (servers[i].getRemainingCPU() == 1):
+                servers.pop(i)
+                i -= 1
             
-    x.append(k)
-    y.append(len(servers))
-    serverSum = serverSum + len(servers)
+            i += 1
+                
+        serverSum = serverSum + len(servers)
+    
+    avgServers = serverSum / k
+    y.append(avgServers)
+    print("----------" + str(N[iterations]) + " : " + str(y[iterations]) + "-----------")
 
-avgServers = serverSum / k
-
-plt.bar(x,y,2, color='red')
-plt.ylabel('Number of Servers')
-plt.xlabel('Time')
-plt.title('Servers needed over time - Avg Servers = '+str(round(avgServers,2)))
+plt.plot(N,y,'b-')
+plt.ylabel('Avg Number of Servers')
+plt.xlabel('N')
+plt.title('Best fit vs First Fit Avg Number of Servers for N jobs')
 plt.show()
 #printServers()
