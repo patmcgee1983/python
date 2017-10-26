@@ -6,7 +6,6 @@ Created on Wed Oct 18 20:30:33 2017
 """
 
 import matplotlib.pyplot as plt
-import queue
 import numpy 
 import random
 
