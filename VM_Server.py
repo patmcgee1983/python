@@ -12,7 +12,7 @@ import random
 # Define Constants & Variables
 servers = []
 enableDebugTests = True
-timeSlots = 1000
+timeSlots = 1000000
 arrivalRate = 0.9
 x = []
 yBest = []
@@ -89,42 +89,34 @@ def firstFit(numberOfVmsCreated):
                 break
 
 def bestFit(numberOfVmsCreated):
-
     
     for numberOfVms in range(0,numberOfVmsCreated):
-        
-        # Generate a new VM id
-        bestVal = 10
-        bestServer = -1
         vmId = numpy.random.randint(0,len(vm))
-            
-        #print(str(len(servers)))
+        bestFitPlace(vmId)
         
-        for i in range(0,len(servers)+1):
-            # If we checked all servers and no room, make new server
-            if (i >= len(servers) and bestServer == -1):
-                createNewServer(i)
+
+def bestFitPlace(vmId): #vmID is a single value between 0 and 2 (inclusive) representing a VM type
+    bestVal = 10
+    bestServer = -1
+    i = 0
+    while(i < len(servers)+1):
+        # If we checked all servers and no room, make new server
+        if ((i == len(servers)) and (bestServer == -1)):
+            createNewServer(i)
+            servers[i].addVm(vmId)
+            return True
+        # If space found on a server, check for exact match, add
+        if (i < len(servers)):
+            if (servers[i].getRemainingCPU() == vm[vmId]):
                 servers[i].addVm(vmId)
-                bestServer = -1
-                break
-            
-            # If space found on a server, check for exact match, add
-            elif (i < len(servers)):
-                if (servers[i].getRemainingCPU() == vm[vmId]):
-                    servers[i].addVm(vmId)
-                    bestServer = -1
-                    break
+                return True
 
-    
-                elif((servers[i].getRemainingCPU() - vm[vmId] > 0) and (servers[i].getRemainingCPU() - vm[vmId] < bestVal)):
-                    bestVal = servers[i].getRemainingCPU() - vm[vmId]
-                    bestServer = i
-                    #print("best")
-            
-        if(bestServer != -1):
-            servers[bestServer].addVm(vmId)
-            #print("added to server "+str(bestServer))
-
+            if((servers[i].getRemainingCPU() - vm[vmId] > 0) and (servers[i].getRemainingCPU() - vm[vmId] < bestVal)):
+                bestVal = servers[i].getRemainingCPU() - vm[vmId]
+                bestServer = i
+        i += 1
+    if(bestServer != -1):
+        servers[bestServer].addVm(vmId)
 
 
 # Print the contents of all servers
