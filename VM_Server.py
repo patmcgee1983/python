@@ -53,7 +53,7 @@ class Server:
             i += 1
                 
     def depart(self,i):
-        item = self.list.remove(i)
+        self.list.remove(i)
         self.cpu = self.cpu + vm[i]
             
                 
@@ -91,14 +91,14 @@ def firstFit(numberOfVmsCreated):
 def bestFit(numberOfVmsCreated): #vmID is a single value between 0 and 2 (inclusive) representing a VM type
     bestVal = 10
     bestServer = -1
-    i = 0
     
     for numberOfVms in range(0,numberOfVmsCreated):
         
         # Generate a new VM id
         vmId = numpy.random.randint(0,len(vm))
             
-        print(str(len(servers)))
+        #print(str(len(servers)))
+        
         for i in range(0,len(servers)+1):
             # If we checked all servers and no room, make new server
             if (i == len(servers)):
@@ -110,6 +110,7 @@ def bestFit(numberOfVmsCreated): #vmID is a single value between 0 and 2 (inclus
             elif (i < len(servers)):
                 if (servers[i].getRemainingCPU() == vm[vmId]):
                     servers[i].addVm(vmId)
+                    break
 
     
             elif((servers[i].getRemainingCPU() - vm[vmId] > 0) and (servers[i].getRemainingCPU() - vm[vmId] < bestVal)):
