@@ -46,14 +46,14 @@ class Server:
         while i < len(self.list):
             # The probability of a vm vacating a server in any timeslot is 1 /  its geometric mean
             if (random.random() <= (1 / geometricMean[self.list[i]])):
-                self.depart()
+                self.depart(self.list[i])
                 i-=1
 
             i += 1
                 
-    def depart(self):
-        item = self.list.pop()
-        self.cpu = self.cpu + vm[item]
+    def depart(self,i):
+        item = self.list.remove(i)
+        self.cpu = self.cpu + vm[i]
             
                 
     
